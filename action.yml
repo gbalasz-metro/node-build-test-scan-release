@@ -16,6 +16,20 @@ name: Build & Deploy master branch to PP environment
 description: |-
   Build NodeJS code, run tests, perform SonarQube scan 
   and run semantic versioning
+inputs:
+  GITHUB_TOKEN:
+    description: |-
+      The GitHub specific token
+    required: true
+  SONAR_TOKEN:
+    description: |-
+      The SonarQube specific token
+    required: true
+  SONAR_HOST_URL:
+    description: |-
+      The SonarQube host URL
+    required: true
+
 outputs:
   release_version:
     description: |-
@@ -24,43 +38,43 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: MSP | Setup Node.js for release
+    - name: Setup Node.js for release
       uses: actions/setup-node@v2
       with:
         node-version: "14"
 
-    - name: MSP | NodeJS build and run tests
-      id: msp-nodejs-build-and-test
+    - name: NodeJS build and run tests
+      id: nodejs-build-and-test
       shell: bash
       run: ${{ github.action_path }}/update-sonar-project-version.sh
 
-    - name: MSP | Install Sonar .releaserc.js config file
+    - name: Install Sonar .releaserc.js config file
       shell: bash
       run: cp ${{ github.action_path }}/sonar.releaserc.js .releaserc.js
 
-    - name: MSP | Update Sonar properties with project version
-      id: msp-update-sonar-project-version
+    - name: Update SonarQube properties with project version
+      id: update-sonar-project-version
       shell: bash
       run: ${{ github.action_path }}/update-sonar-project-version.sh
 
-    - name: MSP | SonarQube scanner
+    - name: SonarQube scanner
       id: sonarqube-scan
       uses: docker://sonarsource/sonar-scanner-cli:latest
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ inputs.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
 
-    - name: MSP | Install CI .releaserc.js config file
+    - name: Install CI .releaserc.js config file
       shell: bash
       run: cp ${{ github.action_path }}/ci.releaserc.js .releaserc.js
 
-    - name: MSP | Semantic Release
-      id: msp-smantic-release
+    - name: Semantic Release
+      id: semantic-release
       shell: bash
       run: yarn semantic-release
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
 
 branding:
   color: yellow
