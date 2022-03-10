@@ -3,5 +3,5 @@
 echo "Performing NodeJS steps..."
 
 npm install -g yarn
-yarn --frozen-lockfile
+yarn
 yarn test
