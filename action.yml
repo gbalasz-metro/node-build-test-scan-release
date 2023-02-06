@@ -41,7 +41,7 @@ runs:
     - name: Setup Node.js for release
       uses: actions/setup-node@v2
       with:
-        node-version: "14"
+        node-version: "18"
 
     - name: Install Sonar .releaserc.js config file
       shell: bash
